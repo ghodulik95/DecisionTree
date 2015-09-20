@@ -167,17 +167,17 @@ class DecisionTree(object):
             curLabel = attrWithLabel[i][1]
             prevLabel = attrWithLabel[i-1][1]
             nextLabel = attrWithLabel[i+1][1]
-
+            #temp = curVal/2 + nextVal/2
             #print "cur (%f,%s) prev (%f,%s) next (%f,%s)" % (curVal, str(curLabel), prevVal, str(prevLabel), nextVal, str(nextLabel))
 
             if curVal != prevVal and curLabel != prevLabel:
-                splits.add((curVal + prevVal)/2)
+                splits.add(curVal/2 + prevVal/2)
             if curVal != nextVal and curLabel != nextLabel:
-                splits.add((curVal + nextVal)/2)
+                splits.add(curVal/2 + nextVal/2)
             if curVal == prevVal:
-                splits.add((curVal + nextVal)/2)
+                splits.add(curVal/2 + nextVal/2)
             if curVal == nextVal:
-                splits.add((curVal + prevVal)/2)
+                splits.add(curVal/2 + prevVal/2)
         #print splits
         return splits
 
