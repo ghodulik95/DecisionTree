@@ -14,6 +14,8 @@ class DecisionTree(object):
         @param depth=None : maximum depth of the tree,
                             or None for no maximum depth
         """
+        if depth == 0:
+            depth = sys.maxint
         self.treeHead = TreeNode(None)
         self.maxDepth = depth
         self.depth = 0
@@ -29,36 +31,38 @@ class DecisionTree(object):
         return
 
     def ID3(self, root, X, y, indexes, attributes, maxDepth):
-        print "Starting"
+        #print "Starting"
+        #print self.schema.nominal_values[0]
         if(root.depth > self.depth):
             self.depth = root.depth
         numTotal = len(indexes)
         numPositive = len(filter(lambda l: y[l] == 1, indexes))
         if numPositive == numTotal:
             root.classLabelConfidence = 1.0
-            print "Ending with 1.0 conf"
+            #print "Ending with 1.0 conf"
             return
         elif numPositive == 0:
             root.classLabelConfidence = 0.0
-            "Ending with 0.0 conf"
+            #print "Ending with 0.0 conf"
             return
         elif len(attributes) == 0 or root.depth >= maxDepth:
             root.classLabelConfidence = float(numPositive)/numTotal
-            print "Ending with %d/%d conf" % (numPositive, numTotal)
+            #print "Ending with %d/%d conf" % (numPositive, numTotal)
             return
 
         (bestAttr, split) = self.getBestAttr(X, y, indexes, attributes)
         root.attribute = bestAttr
         print "Setting attr to %d" % bestAttr
         if split is None:
-            for val in DecisionTree.getValuesOf(bestAttr, X):
+            for val_str in self.schema.nominal_values[bestAttr]:
+                val = int(val_str)
                 childNodeWithVal = TreeNode(root)
                 self.size += 1
                 root.children[val] = childNodeWithVal
                 indexesWithVal = filter(lambda l: X[l][bestAttr] == val, indexes)
                 if len(indexesWithVal) == 0:
                     childNodeWithVal.classLabelConfidence = float(numPositive)/numTotal
-                    print "Ending with %d/%d conf second discrete" % (numPositive, numTotal)
+                    #print "Ending with %d/%d conf second discrete" % (numPositive, numTotal)
                 else:
                     nextAttr = list(attributes)
                     nextAttr.remove(bestAttr)
@@ -70,7 +74,7 @@ class DecisionTree(object):
             indexesGreaterOrEqual = filter(lambda l: X[l][bestAttr] >= split, indexes)
             if(len(indexesGreaterOrEqual) == 0):
                 childGreaterOrEqual.classLabelConfidence = float(numPositive)/numTotal
-                print "Ending with %d/%d conf second cont goe" % (numPositive, numTotal)
+                #print "Ending with %d/%d conf second cont goe" % (numPositive, numTotal)
             else:
                 nextAttr = list(attributes)
                 nextAttr.remove(bestAttr)
@@ -81,7 +85,7 @@ class DecisionTree(object):
             indexesLessThan = filter(lambda l: X[l][bestAttr] < split, indexes)
             if(len(indexesLessThan) == 0):
                 childLessThan.classLabelConfidence = float(numPositive)/numTotal
-                print "Ending with %d/%d conf second cont lt" % (numPositive, numTotal)
+                #print "Ending with %d/%d conf second cont lt" % (numPositive, numTotal)
             else:
                 nextAttr = list(attributes)
                 nextAttr.remove(bestAttr)
@@ -101,12 +105,13 @@ class DecisionTree(object):
         lowestEntropy = float("inf")
         bestSplit = None
         for attr in attributes:
-            print "Checking attr %d" % attr
+            #print "Checking attr %d" % attr
             entropy = 0.0
             split = None
             if(self.attrIsNominal(attr)):
-                possibleValues = DecisionTree.getValuesOf(attr, X)
-                for val in possibleValues:
+                possibleValues = self.schema.nominal_values[attr]
+                for val_string in possibleValues:
+                    val = int(val_string)
                     indexesWithVal = filter(lambda l: X[l][attr] == val, indexes)
                     numYPositive = len(filter(lambda l: y[l] == 1, indexesWithVal))
                     entropy += DecisionTree.calcEntropy(numYPositive, len(indexesWithVal), numTotal)
