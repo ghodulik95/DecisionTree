@@ -60,7 +60,6 @@ class StatisticsManager(object):
 def accuracy(labels, predictions):
     numTotal = len(labels)
     numCorrect = 0
-    print predictions
     for i in range(numTotal):
         if(labels[i] == predictions[i]):
             numCorrect += 1

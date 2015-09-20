@@ -103,8 +103,6 @@ def get_folds(X, y, k):
         train_X.append(cur_train_X)
         train_y.append(cur_train_y)
 
-    print test_y[0]
-
     return zip(train_X, train_y, test_X, test_y)
 
 
@@ -128,11 +126,14 @@ def main(**options):
     folds = get_folds(X, y, k)
     stats_manager = StatisticsManager()
     #import pdb;pdb.set_trace()
+    maxSize = -1
+    maxDepth = -1
     for train_X, train_y, test_X, test_y in folds:
 
         # Construct classifier instance
         print options
         classifier = get_classifier(**options)
+        classifier.schema = schema
 
         # Train classifier
         train_start = time.time()
@@ -143,21 +144,26 @@ def main(**options):
         classifier.fit(train_X, train_y)
         train_time = (train_start - time.time())
 
+        if classifier.size > maxSize:
+            maxSize = classifier.size
+        if classifier.depth > maxDepth:
+            maxDepth = classifier.depth
+
         #For spam and voting
-        print schema.feature_names[classifier.treeHead.attribute]
+        print "Root Attribute: " + schema.feature_names[classifier.treeHead.attribute]
 
         if fs_alg:
             test_X = selector.transform(test_X)
         predictions = classifier.predict(test_X)
         scores = classifier.predict_proba(test_X)
-        #print "Scores : "
-        #print scores
         if len(np.shape(scores)) > 1 and np.shape(scores)[1] > 1:
             scores = scores[:,1]    # Get the column for label 1
         stats_manager.add_fold(test_y, predictions, scores, train_time)
 
-    print ('      Accuracy: %.03f %.03f'
+    print ('\tAccuracy: %.03f %.03f'
         % stats_manager.get_statistic('accuracy', pooled=False))
+    print "\tSize: %d" % maxSize
+    print "\tMaximum Depth: %d" % maxDepth
                 
 
 

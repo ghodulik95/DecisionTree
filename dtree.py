@@ -41,45 +41,135 @@ class DecisionTree(object):
             return
         elif len(attributes) == 0 or root.depth >= maxDepth:
             root.classLabelConfidence = float(numPositive)/numTotal
-            #print "Ending tree here"
             return
 
-        bestAttr = DecisionTree.getBestAttr(X, y, indexes, attributes)
+        (bestAttr, split) = self.getBestAttr(X, y, indexes, attributes)
         root.attribute = bestAttr
-        for val in DecisionTree.getValuesOf(bestAttr, X):
-            childNodeWithVal = TreeNode(root)
-            self.size += 1
-            root.children[val] = childNodeWithVal
-            indexesWithVal = filter(lambda l: X[l][bestAttr] == val, indexes)
-            if len(indexesWithVal) == 0:
+        if split is None:
+            for val in DecisionTree.getValuesOf(bestAttr, X):
+                childNodeWithVal = TreeNode(root)
+                self.size += 1
+                root.children[val] = childNodeWithVal
+                indexesWithVal = filter(lambda l: X[l][bestAttr] == val, indexes)
+                if len(indexesWithVal) == 0:
+                    childNodeWithVal.classLabelConfidence = float(numPositive)/numTotal
+                else:
+                    nextAttr = list(attributes)
+                    nextAttr.remove(bestAttr)
+                    self.ID3(childNodeWithVal, X, y, indexesWithVal, nextAttr, maxDepth)
+        else:
+            root.splitVal = split
+            childGreaterOrEqual = TreeNode(root)
+            root.children[">="] = childGreaterOrEqual
+            indexesGreaterOrEqual = filter(lambda l: X[l][attribute] >= split, indexes)
+            if(len(indexesGreaterOrEqual) == 0):
                 childNodeWithVal.classLabelConfidence = float(numPositive)/numTotal
             else:
-                #print str(bestAttr) + "\n"
-                #print attributes
                 nextAttr = list(attributes)
                 nextAttr.remove(bestAttr)
-                self.ID3(childNodeWithVal, X, y, indexesWithVal, nextAttr, maxDepth)
+                self.ID3(childNodeWithVal, X, y, indexesGreaterOrEqual, nextAttr, maxDepth)
+
+            childLessThan = TreeNode(root)
+            root.children["<"] = childLessThan
+            indexesLessThan = filter(lambda l: X[l][attribute] < split, indexes)
+            if(len(indexesLessThan) == 0):
+                childNodeWithVal.classLabelConfidence = float(numPositive)/numTotal
+            else:
+                nextAttr = list(attributes)
+                nextAttr.remove(bestAttr)
+                self.ID3(childNodeWithVal, X, y, indexesLessThan, nextAttr, maxDepth)
 
         return
         
-    @staticmethod
-    def getBestAttr(X, y, indexes, attributes):
+    def attrIsNominal(self, attr):
+        if self.schema is None:
+            return True
+        else:
+            return self.schema.is_nominal(attr)
+
+    def getBestAttr(self, X, y, indexes, attributes):
         numTotal = len(indexes)
         bestAttr = -1
         lowestEntropy = float("inf")
+        bestSplit = None
         for attr in attributes:
             entropy = 0.0
-            possibleValues = DecisionTree.getValuesOf(attr, X)
-            for val in possibleValues:
-                indexesWithVal = filter(lambda l: X[l][attr] == val, indexes)
-                numYPositive = len(filter(lambda l: y[l] == 1, indexesWithVal))
-                entropy += DecisionTree.calcEntropy(numYPositive, len(indexesWithVal), numTotal)
-            #print "Entropy is %f for %d" % (entropy, attr)
+            split = None
+            if(self.attrIsNominal(attr)):
+                possibleValues = DecisionTree.getValuesOf(attr, X)
+                for val in possibleValues:
+                    indexesWithVal = filter(lambda l: X[l][attr] == val, indexes)
+                    numYPositive = len(filter(lambda l: y[l] == 1, indexesWithVal))
+                    entropy += DecisionTree.calcEntropy(numYPositive, len(indexesWithVal), numTotal)
+            else:
+                (split, entropy) = DecisionTree.getBestSplit(X, y, indexes, attr)
+
             if entropy < lowestEntropy:
                 lowestEntropy = entropy
                 bestAttr = attr
+                bestSplit = split
 
-        return bestAttr
+        return bestAttr, bestSplit
+
+    @staticmethod
+    def getBestSplit(X, y, indexes, attribute):
+        numTotal = len(indexes)
+        lowestEntropy = float("inf")
+        bestSplit = None
+        splits = DecisionTree.getSplits(X, y, attribute)
+        for split in splits:
+            entropy = 0.0
+            indexesGreaterOrEqual = filter(lambda l: X[l][attribute] >= split, indexes)
+            numYPositiveGOE = len(filter(lambda l: y[l] == 1, indexesGreaterOrEqual))
+            entropy += DecisionTree.calcEntropy(numYPositiveGOE, len(indexesGreaterOrEqual), numTotal)
+
+            indexesLessThan = filter(lambda l: X[l][attribute] < split, indexes)
+            numYPositiveLT = len(filter(lambda l: y[l] == 1, indexesLessThan))
+            entropy += DecisionTree.calcEntropy(numYPositiveLT, len(indexesLessThan), numTotal)
+
+            if entropy < lowestEntropy:
+                lowestEntropy = entropy
+                bestSplit = split
+        return bestSplit, lowestEntropy
+
+
+    @staticmethod
+    def getSplits(X, y, attribute):
+        attr = X[:][attribute]
+        attrWithLabel = zip(attr, y)
+        attrWithLabel = DecisionTree.removeDuplicates(attrWithLabel)
+        attrWithLabel.sort(key=lambda l: l[0])
+
+        attrWithLabel.insert(0, (float("-inf"), None))
+        attrWithLabel.append((float("inf"), None))
+        #print attrWithLabel
+        lowestEntropy = 0.0
+        splits = set()
+        for i in range(1, len(attrWithLabel)-1):
+            curVal = attrWithLabel[i][0]
+            prevVal = attrWithLabel[i-1][0]
+            nextVal = attrWithLabel[i+1][0]
+            curLabel = attrWithLabel[i][1]
+            prevLabel = attrWithLabel[i-1][1]
+            nextLabel = attrWithLabel[i+1][1]
+
+            if curVal != prevVal and curLabel != prevLabel:
+                splits.add((curVal + prevVal)/2)
+            if curVal != nextVal and curLabel != nextLabel:
+                splits.add((curVal + nextVal)/2)
+            if curVal == prevVal:
+                splits.add((curVal + nextVal)/2)
+            if curVal == nextVal:
+                splits.add((curVal + prevVal)/2)
+        return splits
+
+    @staticmethod
+    def removeDuplicates(l):
+        toReturn = []
+        for element in l:
+            if element not in toReturn:
+                toReturn.append(l)
+        return toReturn[0]
 
     @staticmethod
     def calcEntropy(numPositive, numWithVal, numTotal):
@@ -92,11 +182,9 @@ class DecisionTree(object):
          if numTotal in [numPositive, numWithVal]:
             return 0
 
-         #print "Numpos %d numWithVal %d numTotal %d" % (numPositive, numWithVal, numTotal)
          probVal = float(numWithVal) / numTotal
          probPos = float(numPositive) / numWithVal
          probNeg = 1 - probPos
-         #print "probVal %f probPos %f probNeg %f" % (- probVal*(probPos*np.log2(probPos) + probNeg*np.log2(probNeg)), probPos*np.log2(probPos), probNeg*np.log2(probNeg))
          return - probVal*(probPos*np.log2(probPos) + probNeg*np.log2(probNeg))
 
     @staticmethod
@@ -130,7 +218,13 @@ class DecisionTree(object):
         while curNode.classLabelConfidence is None:
             curAttr = curNode.attribute
             exampleVal = example[curAttr]
-            curNode = curNode.children[exampleVal]
+            if curNode.splitVal is None:
+                curNode = curNode.children[exampleVal]
+            elif exampleVal >= curNode.splitVal:
+                curNode = curNode.children[">="]
+            elif exampleVal < curNode.splitVal:
+                curNode = curNode.children["<"]
+
         return curNode.classLabelConfidence
 
     def size(self):
@@ -157,9 +251,5 @@ class TreeNode(object):
         else:
             self.depth = self.parent.depth + 1
         self.classLabelConfidence = None
-
-    def makeLeafNode(self, confidenceLevel):
-        self.classLabelConfidence = confidenceLevel
-        self.trueNode = None
-        self.falseNode = None
+        self.splitVal = None
 
