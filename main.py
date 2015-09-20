@@ -84,7 +84,7 @@ def get_folds(X, y, k):
     train_y = []
     test_X = []
     test_y = []
-    for testFold in range(0, k-1):
+    for testFold in range(k):
         cur_test_X = []
         cur_test_y = []
         for exampleIndex in folds[testFold]:
@@ -127,7 +127,7 @@ def main(**options):
     schema, X, y = get_dataset(dataset, dataset_directory)
     folds = get_folds(X, y, k)
     stats_manager = StatisticsManager()
-    import pdb;pdb.set_trace()
+    #import pdb;pdb.set_trace()
     for train_X, train_y, test_X, test_y in folds:
 
         # Construct classifier instance
@@ -143,10 +143,15 @@ def main(**options):
         classifier.fit(train_X, train_y)
         train_time = (train_start - time.time())
 
+        #For spam and voting
+        print schema.feature_names[classifier.treeHead.attribute]
+
         if fs_alg:
             test_X = selector.transform(test_X)
         predictions = classifier.predict(test_X)
         scores = classifier.predict_proba(test_X)
+        #print "Scores : "
+        #print scores
         if len(np.shape(scores)) > 1 and np.shape(scores)[1] > 1:
             scores = scores[:,1]    # Get the column for label 1
         stats_manager.add_fold(test_y, predictions, scores, train_time)

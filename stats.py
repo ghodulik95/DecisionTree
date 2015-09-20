@@ -58,7 +58,13 @@ class StatisticsManager(object):
             return np.average(stats), np.std(stats)
 
 def accuracy(labels, predictions):
-    pass
+    numTotal = len(labels)
+    numCorrect = 0
+    print predictions
+    for i in range(numTotal):
+        if(labels[i] == predictions[i]):
+            numCorrect += 1
+    return float(numCorrect)/numTotal
 
 def precision(labels, predictions):
     pass
