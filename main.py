@@ -150,7 +150,7 @@ def main(**options):
             maxDepth = classifier.depth
 
         #For spam and voting
-        print "Root Attribute: " + schema.feature_names[classifier.treeHead.attribute]
+        print "Root Attribute: [%d] %s" % (classifier.treeHead.attribute, schema.feature_names[classifier.treeHead.attribute])
 
         if fs_alg:
             test_X = selector.transform(test_X)

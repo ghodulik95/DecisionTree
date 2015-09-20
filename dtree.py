@@ -61,23 +61,23 @@ class DecisionTree(object):
             root.splitVal = split
             childGreaterOrEqual = TreeNode(root)
             root.children[">="] = childGreaterOrEqual
-            indexesGreaterOrEqual = filter(lambda l: X[l][attribute] >= split, indexes)
+            indexesGreaterOrEqual = filter(lambda l: X[l][bestAttr] >= split, indexes)
             if(len(indexesGreaterOrEqual) == 0):
-                childNodeWithVal.classLabelConfidence = float(numPositive)/numTotal
+                childGreaterOrEqual.classLabelConfidence = float(numPositive)/numTotal
             else:
                 nextAttr = list(attributes)
                 nextAttr.remove(bestAttr)
-                self.ID3(childNodeWithVal, X, y, indexesGreaterOrEqual, nextAttr, maxDepth)
+                self.ID3(childGreaterOrEqual, X, y, indexesGreaterOrEqual, nextAttr, maxDepth)
 
             childLessThan = TreeNode(root)
             root.children["<"] = childLessThan
-            indexesLessThan = filter(lambda l: X[l][attribute] < split, indexes)
+            indexesLessThan = filter(lambda l: X[l][bestAttr] < split, indexes)
             if(len(indexesLessThan) == 0):
-                childNodeWithVal.classLabelConfidence = float(numPositive)/numTotal
+                childLessThan.classLabelConfidence = float(numPositive)/numTotal
             else:
                 nextAttr = list(attributes)
                 nextAttr.remove(bestAttr)
-                self.ID3(childNodeWithVal, X, y, indexesLessThan, nextAttr, maxDepth)
+                self.ID3(childLessThan, X, y, indexesLessThan, nextAttr, maxDepth)
 
         return
         
