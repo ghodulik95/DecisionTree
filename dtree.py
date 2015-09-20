@@ -14,7 +14,7 @@ class DecisionTree(object):
         @param depth=None : maximum depth of the tree,
                             or None for no maximum depth
         """
-        self.treeHead = TreeNode(None, None, None)
+        self.treeHead = TreeNode(None)
         self.maxDepth = depth
         pass
 
@@ -22,55 +22,60 @@ class DecisionTree(object):
         """ Build a decision tree classifier trained on data (X, y) """
         
 
-        ID3(self.treeHead, X, y, range(len(y)), range(len(X[0])))
+        DecisionTree.ID3(self.treeHead, X, y, range(len(y)), range(len(X[0])))
 
         return
 
+    @staticmethod
     def ID3(root, X, y, indexes, attributes):
         numTotal = len(indexes)
         numPositive = len(filter(lambda l: l == 1, y))
         if numPositive == numTotal:
             root.classLabelConfidence = 1.0
             return
-        else if numPositive == 0:
+        elif numPositive == 0:
             root.classLabelConfidence = 0.0
             return
-        else if len(indexes) == 0 or len(attributes) == 0
+        elif len(indexes) == 0 or len(attributes) == 0:
             root.classLabelConfidence = numPositive/numTotal
             return
 
-        bestAttr = getBestAttr(X, y, indexes, attributes)
+        bestAttr = DecisionTree.getBestAttr(X, y, indexes, attributes)
         root.attribute = bestAttr
-        for val in getValuesOf(bestAttr, X)
+        for val in DecisionTree.getValuesOf(bestAttr, X):
             childNodeWithVal = TreeNode(root)
             root.children.append(childNodeWithVal)
-            indexesWithVal = filter(lambda l: X[l][attr] == val, indexes)
+            indexesWithVal = filter(lambda l: X[l][bestAttr] == val, indexes)
             if len(indexesWithVal) == 0:
                 childNodeWithVal.classLabelConfidence = numPositive/numTotal
             else:
-                ID3(childNodeWithVal, X, y, indexesWithVal, attributes.remove(bestAttr))
+                print str(bestAttr) + "\n"
+                print attributes
+                DecisionTree.ID3(childNodeWithVal, X, y, indexesWithVal, attributes.remove(bestAttr))
 
         return
         
-    def getBestAttriute(X, y, indexes, attributes):
+    @staticmethod
+    def getBestAttr(X, y, indexes, attributes):
         numTotal = len(indexes)
         bestAttr = -1
         lowestEntropy = float("inf")
         for attr in attributes:
             entropy = 0.0
-            possibleValues = getValuesOf(attr, X)
+            possibleValues = DecisionTree.getValuesOf(attr, X)
             for val in possibleValues:
                 indexesWithVal = filter(lambda l: X[l][attr] == val, indexes)
-                numYPositive = filter(lambda l: y[l] == 1, indexesWithVal)
-                entropy += calcEntropy(numYPositive, len(indexesWithVal), numTotal)
+                numYPositive = len(filter(lambda l: y[l] == 1, indexesWithVal))
+                entropy += DecisionTree.calcEntropy(numYPositive, len(indexesWithVal), numTotal)
             if entropy < lowestEntropy:
                 lowestEntropy = entropy
                 bestAttr = attr
 
         return bestAttr
 
+    @staticmethod
     def calcEntropy(numPositive, numWithVal, numTotal):
-         if(numPositive == 0 || numPositive == numTotal):
+         if numPositive == 0 or numPositive == numTotal:
             return 0
 
          probVal = numWithVal / numTotal
@@ -78,6 +83,7 @@ class DecisionTree(object):
          probNeg = 1 - probPos
          return - (probPos*np.log2(probPos) + probNeg*np.log2(probNeg))
 
+    @staticmethod
     def getValuesOf(attr, X):
         vals = set()
         for example in X:
@@ -119,14 +125,14 @@ class DecisionTree(object):
         pass
 
 
-class TreeNode(object)
+class TreeNode(object):
 
     def __init__(self, parent):
         self.children = []
         self.parent = parent
         self.classLabelConfidence = None
 
-    def makeLeafNode(self, confidenceLevel)
+    def makeLeafNode(self, confidenceLevel):
         self.classLabelConfidence = confidenceLevel
         self.trueNode = None
         self.falseNode = None
