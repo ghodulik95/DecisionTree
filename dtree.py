@@ -146,7 +146,9 @@ class DecisionTree(object):
 
     @staticmethod
     def getSplits(X, y, attribute):
-        attr = X[:][attribute]
+        #print len(X)
+        attr = [row[attribute] for row in X]
+        #print len(attr)
         attrWithLabel = zip(attr, y)
         
         attrWithLabel = DecisionTree.removeDuplicates(attrWithLabel)
@@ -166,7 +168,7 @@ class DecisionTree(object):
             prevLabel = attrWithLabel[i-1][1]
             nextLabel = attrWithLabel[i+1][1]
 
-            #print "cur %f prev %f next %f" % (curVal, prevVal, nextVal)
+            #print "cur (%f,%s) prev (%f,%s) next (%f,%s)" % (curVal, str(curLabel), prevVal, str(prevLabel), nextVal, str(nextLabel))
 
             if curVal != prevVal and curLabel != prevLabel:
                 splits.add((curVal + prevVal)/2)
@@ -176,6 +178,7 @@ class DecisionTree(object):
                 splits.add((curVal + nextVal)/2)
             if curVal == nextVal:
                 splits.add((curVal + prevVal)/2)
+        #print splits
         return splits
 
     @staticmethod
@@ -191,10 +194,6 @@ class DecisionTree(object):
          if 0 in [numPositive, numWithVal, numTotal]:
             return 0
          if numPositive in [numWithVal, numTotal]:
-            return 0
-         if numWithVal in [numPositive, numTotal]:
-            return 0
-         if numTotal in [numPositive, numWithVal]:
             return 0
 
          probVal = float(numWithVal) / numTotal
