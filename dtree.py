@@ -29,22 +29,27 @@ class DecisionTree(object):
         return
 
     def ID3(self, root, X, y, indexes, attributes, maxDepth):
+        print "Starting"
         if(root.depth > self.depth):
             self.depth = root.depth
         numTotal = len(indexes)
         numPositive = len(filter(lambda l: y[l] == 1, indexes))
         if numPositive == numTotal:
             root.classLabelConfidence = 1.0
+            print "Ending with 1.0 conf"
             return
         elif numPositive == 0:
             root.classLabelConfidence = 0.0
+            "Ending with 0.0 conf"
             return
         elif len(attributes) == 0 or root.depth >= maxDepth:
             root.classLabelConfidence = float(numPositive)/numTotal
+            print "Ending with %d/%d conf" % (numPositive, numTotal)
             return
 
         (bestAttr, split) = self.getBestAttr(X, y, indexes, attributes)
         root.attribute = bestAttr
+        print "Setting attr to %d" % bestAttr
         if split is None:
             for val in DecisionTree.getValuesOf(bestAttr, X):
                 childNodeWithVal = TreeNode(root)
@@ -53,6 +58,7 @@ class DecisionTree(object):
                 indexesWithVal = filter(lambda l: X[l][bestAttr] == val, indexes)
                 if len(indexesWithVal) == 0:
                     childNodeWithVal.classLabelConfidence = float(numPositive)/numTotal
+                    print "Ending with %d/%d conf second discrete" % (numPositive, numTotal)
                 else:
                     nextAttr = list(attributes)
                     nextAttr.remove(bestAttr)
@@ -64,6 +70,7 @@ class DecisionTree(object):
             indexesGreaterOrEqual = filter(lambda l: X[l][bestAttr] >= split, indexes)
             if(len(indexesGreaterOrEqual) == 0):
                 childGreaterOrEqual.classLabelConfidence = float(numPositive)/numTotal
+                print "Ending with %d/%d conf second cont goe" % (numPositive, numTotal)
             else:
                 nextAttr = list(attributes)
                 nextAttr.remove(bestAttr)
@@ -74,6 +81,7 @@ class DecisionTree(object):
             indexesLessThan = filter(lambda l: X[l][bestAttr] < split, indexes)
             if(len(indexesLessThan) == 0):
                 childLessThan.classLabelConfidence = float(numPositive)/numTotal
+                print "Ending with %d/%d conf second cont lt" % (numPositive, numTotal)
             else:
                 nextAttr = list(attributes)
                 nextAttr.remove(bestAttr)
@@ -93,6 +101,7 @@ class DecisionTree(object):
         lowestEntropy = float("inf")
         bestSplit = None
         for attr in attributes:
+            print "Checking attr %d" % attr
             entropy = 0.0
             split = None
             if(self.attrIsNominal(attr)):
@@ -108,6 +117,8 @@ class DecisionTree(object):
                 lowestEntropy = entropy
                 bestAttr = attr
                 bestSplit = split
+                splitString = str(bestSplit)
+                print "Best is at attr %d with split %s" % (bestAttr, splitString)
 
         return bestAttr, bestSplit
 
@@ -137,11 +148,13 @@ class DecisionTree(object):
     def getSplits(X, y, attribute):
         attr = X[:][attribute]
         attrWithLabel = zip(attr, y)
+        
         attrWithLabel = DecisionTree.removeDuplicates(attrWithLabel)
+        #print attrWithLabel
         attrWithLabel.sort(key=lambda l: l[0])
 
-        attrWithLabel.insert(0, (float("-inf"), None))
-        attrWithLabel.append((float("inf"), None))
+        attrWithLabel.insert(0, [float("-inf"), None])
+        attrWithLabel.append([float("inf"), None])
         #print attrWithLabel
         lowestEntropy = 0.0
         splits = set()
@@ -152,6 +165,8 @@ class DecisionTree(object):
             curLabel = attrWithLabel[i][1]
             prevLabel = attrWithLabel[i-1][1]
             nextLabel = attrWithLabel[i+1][1]
+
+            #print "cur %f prev %f next %f" % (curVal, prevVal, nextVal)
 
             if curVal != prevVal and curLabel != prevLabel:
                 splits.add((curVal + prevVal)/2)
@@ -166,10 +181,10 @@ class DecisionTree(object):
     @staticmethod
     def removeDuplicates(l):
         toReturn = []
-        for element in l:
-            if element not in toReturn:
-                toReturn.append(l)
-        return toReturn[0]
+        for val, label in l:
+            if [val, label] not in toReturn:
+                toReturn.append([val,label])
+        return toReturn
 
     @staticmethod
     def calcEntropy(numPositive, numWithVal, numTotal):
