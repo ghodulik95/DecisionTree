@@ -132,30 +132,44 @@ class DecisionTree(object):
         numTotal = len(indexes)
         lowestEntropy = float("inf")
         bestSplit = None
-        splits = DecisionTree.getSplits(X, y, attribute)
-        for split in splits:
-            entropy = 0.0
-            indexesGreaterOrEqual = filter(lambda l: X[l][attribute] >= split, indexes)
-            numYPositiveGOE = len(filter(lambda l: y[l] == 1, indexesGreaterOrEqual))
-            entropy += DecisionTree.calcEntropy(numYPositiveGOE, len(indexesGreaterOrEqual), numTotal)
+        splits = DecisionTree.getSplits(X, y, indexes, attribute)
+        splits.sort()
 
-            indexesLessThan = filter(lambda l: X[l][attribute] < split, indexes)
-            numYPositiveLT = len(filter(lambda l: y[l] == 1, indexesLessThan))
-            entropy += DecisionTree.calcEntropy(numYPositiveLT, len(indexesLessThan), numTotal)
+        attr = [row[attribute] for row in X]
+        attrWithLabel = zip(attr, y)
+        attrWithLabel = DecisionTree.removeNotInIndexes(attrWithLabel, indexes)
+        attrWithLabel.sort(key=lambda l: l[0])
+        numPositiveGOE = len(filter(lambda l: y[l] == 1, indexes))
+        numPositiveLT = 0
+
+        i = 0
+        for split in splits:
+            while i < len(attrWithLabel) and attrWithLabel[i][0] < split:
+                if attrWithLabel[i][1] == 1:
+                    numPositiveGOE -= 1
+                    numPositiveLT += 1
+                i += 1
+
+            entropy = 0.0
+            numGOE = numTotal - i
+            entropy += DecisionTree.calcEntropy(numPositiveGOE, numGOE, numTotal)
+
+            numLT = i
+            entropy += DecisionTree.calcEntropy(numPositiveLT, numLT, numTotal)
 
             if entropy < lowestEntropy:
                 lowestEntropy = entropy
                 bestSplit = split
         return bestSplit, lowestEntropy
 
-
     @staticmethod
-    def getSplits(X, y, attribute):
+    def getSplits(X, y, indexes, attribute):
         #print len(X)
         attr = [row[attribute] for row in X]
         #print len(attr)
         attrWithLabel = zip(attr, y)
-        
+
+        attrWithLabel = DecisionTree.removeNotInIndexes(attrWithLabel, indexes)
         attrWithLabel = DecisionTree.removeDuplicates(attrWithLabel)
         #print attrWithLabel
         attrWithLabel.sort(key=lambda l: l[0])
@@ -184,7 +198,15 @@ class DecisionTree(object):
             if curVal == nextVal:
                 splits.add(curVal/2 + prevVal/2)
         #print splits
-        return splits
+        return list(splits)
+
+    @staticmethod
+    def removeNotInIndexes(l, indexes):
+        toReturn = []
+        for i in range(len(l)):
+            if i in indexes:
+                toReturn.append(l[i])
+        return toReturn
 
     @staticmethod
     def removeDuplicates(l):
@@ -204,6 +226,7 @@ class DecisionTree(object):
          probVal = float(numWithVal) / numTotal
          probPos = float(numPositive) / numWithVal
          probNeg = 1 - probPos
+         #print "pos %f neg %f" % (probPos, probNeg)
          return - probVal*(probPos*np.log2(probPos) + probNeg*np.log2(probNeg))
 
     @staticmethod
