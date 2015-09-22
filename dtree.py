@@ -52,7 +52,7 @@ class DecisionTree(object):
 
         (bestAttr, split) = self.getBestAttr(X, y, indexes, attributes)
         root.attribute = bestAttr
-        print "Setting attr to %d" % bestAttr
+        #print "Setting attr to %d" % bestAttr
         if split is None:
             for val_str in self.schema.nominal_values[bestAttr]:
                 val = int(val_str)
@@ -123,7 +123,7 @@ class DecisionTree(object):
                 bestAttr = attr
                 bestSplit = split
                 splitString = str(bestSplit)
-                print "Best is at attr %d with split %s" % (bestAttr, splitString)
+                #print "Best is at attr %d with split %s" % (bestAttr, splitString)
 
         return bestAttr, bestSplit
 
