@@ -3,6 +3,8 @@ The Decision Tree Classifier
 """
 import numpy as np
 import scipy
+#imporing sys just for maxint in __init__
+import sys
 
 class DecisionTree(object):
 
@@ -15,9 +17,10 @@ class DecisionTree(object):
                             or None for no maximum depth
         """
         if depth == 0:
-            depth = sys.maxint
+            self.maxDepth = sys.maxint
+        else:
+            self.maxDepth = depth
         self.treeHead = TreeNode(None)
-        self.maxDepth = depth
         self.depth = 0
         self.size = 1
         pass
