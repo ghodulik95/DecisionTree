@@ -1,0 +1,18 @@
+{'depth': 1, 'classifier': 'dtree'}
+train time: -0.031000
+Root Attribute: [0] Repealing-the-Job-Killing-Health-Care-Law-Act
+{'depth': 1, 'classifier': 'dtree'}
+train time: -0.016000
+Root Attribute: [0] Repealing-the-Job-Killing-Health-Care-Law-Act
+{'depth': 1, 'classifier': 'dtree'}
+train time: -0.015000
+Root Attribute: [0] Repealing-the-Job-Killing-Health-Care-Law-Act
+{'depth': 1, 'classifier': 'dtree'}
+train time: -0.015000
+Root Attribute: [0] Repealing-the-Job-Killing-Health-Care-Law-Act
+{'depth': 1, 'classifier': 'dtree'}
+train time: -0.032000
+Root Attribute: [0] Repealing-the-Job-Killing-Health-Care-Law-Act
+	Accuracy: 0.986 0.005
+	Size: 4
+	Maximum Depth: 1
