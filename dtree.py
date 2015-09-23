@@ -26,7 +26,7 @@ class DecisionTree(object):
         self.depth = 0
         self.size = 1
 
-        self.maxparallelbranches = 3
+        self.maxparallelbranches = 2
         self.parallelbranchesCount = 0
         self.lock = Lock()
         pass
@@ -130,10 +130,10 @@ class DecisionTree(object):
         
         #print "Made it here"
         for p in branchthreads:
-            p.join()
             self.lock.acquire()
             self.parallelbranchesCount -= 1
             self.lock.release()
+            p.join()
         return
         
     def attrIsNominal(self, attr):
