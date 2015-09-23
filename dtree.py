@@ -418,6 +418,7 @@ class TreeNode(object):
     def isLeaf(self):
         return self.classLabelConfidence != None
 
+    #Returns whether or not the attribute value assosciated with this node is nominal
     def isNominal(self):
         return self.splitVal is None
 
