@@ -63,8 +63,18 @@ class DecisionTree(object):
             root.classLabelConfidence = float(numPositive)/numTotal
             return
 
-        #If none of the above cases apply, we find the best attribute to apply to this node
-        (bestAttr, split) = self.getBestAttr(X, y, indexes, attributes)
+        #Calculate the previous entropy
+        prevEntropy = DecisionTree.calcWeightedEntropy(numPositive, numTotal, numTotal)
+
+        #Find the best attribute to apply to this node
+        (bestAttr, split, entropy) = self.getBestAttr(X, y, indexes, attributes)
+        #If the best attribute (attribute which had the lowest entropy) has a greater entropy than the previous
+        # This means that information gain is negative, so we stop the tree here             
+        if(entropy > prevEntropy):
+            #The class label confidence is the percentage which are positive
+            root.classLabelConfidence = float(numPositive)/numTotal
+            return
+
         root.attribute = bestAttr
         #If the split of bestAttr is None, meaning this is a discrete attribute
         if split is None:
@@ -158,27 +168,24 @@ class DecisionTree(object):
                 bestAttr = attr
                 bestSplit = split
 
-        return bestAttr, bestSplit
+        return bestAttr, bestSplit, lowestEntropy
 
     #We will find the split value which resuls in the lowest entropy for the given attribute
     #Returns (bestSplit,lowestEntropy)
     @staticmethod
     def getBestSplit(X, y, indexes, attribute):
-        #First, we get all the possible split values for this attribute
-        #Note that the first split will always be -inf and the last +inf
-        #splits = DecisionTree.getSplits(X, y, indexes, attribute)
-
         #Project the attribute onto it's corresponding class label
+        # This returns a list of attribute-value, class label pairs for all the examples in the indexes
         attrWithLabel = DecisionTree.projectAttributeWithClassLabel(X, y, indexes, attribute)
         #Sort over the attribute value
         attrWithLabel.sort(key=lambda l: l[0])
 
-        #We will iterate over all the splits
+        #We will iterate over all the split candidates
         #To have a O(N) runtime, I keep track of the number of positive class labels in the >= split and < split categories
         # as we iterate
         #The number of total examples will always be the length of the list of indexes
         numTotal = len(indexes)
-        #Intially, all example are >= the split (first split is -inf), so the number of positve example GOE
+        #Intially, all example are >= the split (first split candidate is -inf), so the number of positve example GOE
         # is just the number of all positive examples
         numPositiveGOE = len(filter(lambda l: y[l] == 1, indexes))
         #Similarly, no exaples are < -inf, so there are no LT positive examples
@@ -186,8 +193,9 @@ class DecisionTree(object):
         #Inital values to find the best split
         lowestEntropy = float("inf")
         bestSplit = None
+        #Get the sorted split candidates - note that first and last candidates are always -inf,+inf respectively
         splits = DecisionTree.getSplits(list(attrWithLabel))
-        #i is the index of the first value to be >= the current split
+        #i is the index of the first value to be >= the current split candidate
         #So, when the first split is -inf, i is 0
         i = 0
         for split in splits:
@@ -259,7 +267,9 @@ class DecisionTree(object):
             #If the values of the attributes of current and prev/next are different AND class labels are different
             # We add  the average of the two attribute values to our set of split candidates
             if curVal != prevVal and curLabel != prevLabel:
-                splits.add(curVal/2 + prevVal/2)
+                #An aside: doing the additions before divisions resulted in an overflow error in my volcanoes tests
+                # This is why I divide first, if you were wondering
+                splits.add(curVal/2 + prevVal/2)   
             if curVal != nextVal and curLabel != nextLabel:
                 splits.add(curVal/2 + nextVal/2)
             #If the current value == the previous value, then that means the current value is both positive and non-positive
