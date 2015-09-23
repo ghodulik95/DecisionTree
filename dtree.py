@@ -5,6 +5,8 @@ import numpy as np
 import scipy
 #imporing sys just for maxint in __init__
 import sys
+#Using multiprocessing to speedup
+from threading import Thread, Lock
 
 class DecisionTree(object):
 
@@ -23,6 +25,10 @@ class DecisionTree(object):
         self.treeHead = TreeNode(None)
         self.depth = 0
         self.size = 1
+
+        self.maxparallelbranches = 3
+        self.parallelbranchesCount = 0
+        self.lock = Lock()
         pass
 
     def fit(self, X, y, sample_weight=None):
@@ -55,6 +61,7 @@ class DecisionTree(object):
 
         (bestAttr, split) = self.getBestAttr(X, y, indexes, attributes)
         root.attribute = bestAttr
+        branchthreads = []
         #print "Setting attr to %d" % bestAttr
         if split is None:
             for val_str in self.schema.nominal_values[bestAttr]:
@@ -69,7 +76,16 @@ class DecisionTree(object):
                 else:
                     nextAttr = list(attributes)
                     nextAttr.remove(bestAttr)
-                    self.ID3(childNodeWithVal, X, y, indexesWithVal, nextAttr, maxDepth)
+                    self.lock.acquire()
+                    if self.parallelbranchesCount >= self.maxparallelbranches:
+                        self.lock.release()
+                        self.ID3(childNodeWithVal, X, y, indexesWithVal, nextAttr, maxDepth)
+                    else:
+                        self.parallelbranchesCount += 1
+                        self.lock.release()
+                        p = Thread(target=self.ID3, args = [childNodeWithVal, X, y, indexesWithVal, nextAttr, maxDepth])
+                        branchthreads.append(p)
+                        p.start()
         else:
             root.splitVal = split
             childGreaterOrEqual = TreeNode(root)
@@ -81,7 +97,16 @@ class DecisionTree(object):
             else:
                 nextAttr = list(attributes)
                 nextAttr.remove(bestAttr)
-                self.ID3(childGreaterOrEqual, X, y, indexesGreaterOrEqual, nextAttr, maxDepth)
+                self.lock.acquire()
+                if self.parallelbranchesCount >= self.maxparallelbranches:
+                    self.lock.release()
+                    self.ID3(childGreaterOrEqual, X, y, indexesGreaterOrEqual, nextAttr, maxDepth)
+                else:
+                    self.parallelbranchesCount += 1
+                    self.lock.release()
+                    p = Thread(target=self.ID3, args = [childGreaterOrEqual, X, y, indexesGreaterOrEqual, nextAttr, maxDepth])
+                    branchthreads.append(p)
+                    p.start()
 
             childLessThan = TreeNode(root)
             root.children["<"] = childLessThan
@@ -92,8 +117,23 @@ class DecisionTree(object):
             else:
                 nextAttr = list(attributes)
                 nextAttr.remove(bestAttr)
-                self.ID3(childLessThan, X, y, indexesLessThan, nextAttr, maxDepth)
-
+                self.lock.acquire()
+                if self.parallelbranchesCount >= self.maxparallelbranches:
+                    self.lock.release()
+                    self.ID3(childLessThan, X, y, indexesLessThan, nextAttr, maxDepth)
+                else:
+                    self.parallelbranchesCount += 1
+                    self.lock.release()
+                    p = Thread(target=self.ID3, args = [childLessThan, X, y, indexesLessThan, nextAttr, maxDepth])
+                    branchthreads.append(p)
+                    p.start()
+        
+        #print "Made it here"
+        for p in branchthreads:
+            p.join()
+            self.lock.acquire()
+            self.parallelbranchesCount -= 1
+            self.lock.release()
         return
         
     def attrIsNominal(self, attr):
