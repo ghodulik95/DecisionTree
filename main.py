@@ -149,6 +149,7 @@ def main(**options):
         if classifier.depth > maxDepth:
             maxDepth = classifier.depth
 
+        print "train time: %f" % train_time
         #For spam and voting
         print "Root Attribute: [%d] %s" % (classifier.treeHead.attribute, schema.feature_names[classifier.treeHead.attribute])
 
