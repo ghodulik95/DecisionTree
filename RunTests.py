@@ -1,7 +1,9 @@
 import subprocess
 from collections import OrderedDict
 
+#Use an ordered dictionary so we can perform the quicker tests first
 tests = OrderedDict()
+#Add (testName, command) key-value pairs
 tests['voting-dept-1']=['python', 
 			r'C:\\Users\\George\\Documents\\VMSharedFolder\\EECS440PA1\\code\\code\\python\\main.py',
 			'--dataset_directory',
@@ -111,9 +113,13 @@ tests['volcanoes-dept-5']=['python',
 			'--depth',
 			'5']
 
+#For each test
 for fileName, args in tests.iteritems():
+	#Run the tests and capture its printouts
 	result = subprocess.check_output(args)
+	#Save the printouts to a file
 	f = open(r'C:\\Users\\George\\Documents\\VMSharedFolder\\EECS440PA1\\code\\code\\python\\tests\\'+fileName+'.txt', 'w')
 	f.write(result)
 	f.close()
+	#Print out that this test has finished
 	print fileName+' test is done '

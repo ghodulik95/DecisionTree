@@ -1,0 +1,18 @@
+{'depth': 5, 'classifier': 'dtree'}
+train time: -49.970000
+Root Attribute: [0] image_id
+{'depth': 5, 'classifier': 'dtree'}
+train time: -48.734000
+Root Attribute: [0] image_id
+{'depth': 5, 'classifier': 'dtree'}
+train time: -50.726000
+Root Attribute: [0] image_id
+{'depth': 5, 'classifier': 'dtree'}
+train time: -48.284000
+Root Attribute: [0] image_id
+{'depth': 5, 'classifier': 'dtree'}
+train time: -85.299000
+Root Attribute: [0] image_id
+	Accuracy: 0.733 0.028
+	Size: 56
+	Maximum Depth: 5

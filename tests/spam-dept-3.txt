@@ -1,0 +1,18 @@
+{'depth': 3, 'classifier': 'dtree'}
+train time: -2618.150000
+Root Attribute: [5] OS
+{'depth': 3, 'classifier': 'dtree'}
+train time: -2610.760000
+Root Attribute: [5] OS
+{'depth': 3, 'classifier': 'dtree'}
+train time: -2615.284000
+Root Attribute: [5] OS
+{'depth': 3, 'classifier': 'dtree'}
+train time: -2618.625000
+Root Attribute: [5] OS
+{'depth': 3, 'classifier': 'dtree'}
+train time: -4670.306000
+Root Attribute: [5] OS
+	Accuracy: 0.737 0.005
+	Size: 7
+	Maximum Depth: 3

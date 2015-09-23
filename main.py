@@ -126,6 +126,7 @@ def main(**options):
     folds = get_folds(X, y, k)
     stats_manager = StatisticsManager()
     #import pdb;pdb.set_trace()
+    #I am keeping track of the maxSize and maxDepth of each of the k tests, to print out at the end
     maxSize = -1
     maxDepth = -1
     for train_X, train_y, test_X, test_y in folds:
@@ -141,17 +142,21 @@ def main(**options):
             selector = FS_ALGORITHMS[fs_alg](n=fs_n)
             selector.fit(train_X)
             train_X = selector.transform(train_X)
+        #Note that I changed fit to take in the schema
         classifier.fit(train_X, train_y, schema)
         train_time = (train_start - time.time())
 
+        #Maintennce to keep track of the maxSize and maxDepth
         if classifier.size > maxSize:
             maxSize = classifier.size
         if classifier.depth > maxDepth:
             maxDepth = classifier.depth
 
-        print "train time: %f" % train_time
-        #For spam and voting
-        print "Root Attribute: [%d] %s" % (classifier.treeHead.attribute, schema.feature_names[classifier.treeHead.attribute])
+        #For my testing purposes, I had printed out the train_time
+        #print "train time: %f" % train_time
+        
+        #For spam and voting tests, I printed out the root attribute
+        #print "Root Attribute: [%d] %s" % (classifier.treeHead.attribute, schema.feature_names[classifier.treeHead.attribute])
 
         if fs_alg:
             test_X = selector.transform(test_X)
@@ -161,9 +166,10 @@ def main(**options):
             scores = scores[:,1]    # Get the column for label 1
         stats_manager.add_fold(test_y, predictions, scores, train_time)
 
+    #The printouts specified by the assignments
     print ('\tAccuracy: %.03f %.03f'
         % stats_manager.get_statistic('accuracy', pooled=False))
-    print "\tSize: %d" % maxSize
+    print "\tMaximum Size: %d" % maxSize
     print "\tMaximum Depth: %d" % maxDepth
                 
 
