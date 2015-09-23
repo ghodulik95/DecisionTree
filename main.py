@@ -141,7 +141,7 @@ def main(**options):
             selector = FS_ALGORITHMS[fs_alg](n=fs_n)
             selector.fit(train_X)
             train_X = selector.transform(train_X)
-        classifier.fit(train_X, train_y)
+        classifier.fit(train_X, train_y, schema)
         train_time = (train_start - time.time())
 
         if classifier.size > maxSize:
