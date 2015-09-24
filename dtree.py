@@ -116,7 +116,6 @@ class DecisionTree(object):
             indexesLessThan = filter(lambda l: X[l][bestAttr] < split, indexes)
             if(len(indexesLessThan) == 0):
                 childLessThan.classLabelConfidence = float(numPositive)/numTotal
-                #print "Ending with %d/%d conf second cont lt" % (numPositive, numTotal)
             else:
                 nextAttr = list(attributes)
                 nextAttr.remove(bestAttr)

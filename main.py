@@ -65,28 +65,34 @@ def get_folds(X, y, k):
     @param k : number of folds
     @return (train_X, train_y, test_X, test_y) for each fold
     """
-    pass #add code here
+    pass
 
+    #Make k folds
     folds = [list() for i in range(k)]
     curFold = 0
-    for exampleIndex in filter(lambda x: y[x] == 1 , range(0, len(X)-1)):
+    #Iterate over every positive class ;abel index, assigning one to each fold and repeating
+    for exampleIndex in filter(lambda x: y[x] == 1 , range(len(X))):
         folds[curFold].append(exampleIndex)
         curFold += 1
         if curFold == k:
             curFold = 0
-    for exampleIndex in filter(lambda x: y[x] != 1 , range(0, len(X)-1)):
+    #Iterate over every index of not positive class labels, assigning one to each fold and repeating
+    for exampleIndex in filter(lambda x: y[x] != 1 , range(len(X))):
         folds[curFold].append(exampleIndex)
         curFold += 1
         if curFold == k:
             curFold = 0
 
+    #Our lists of lists of examples and class labels
     train_X = []
     train_y = []
     test_X = []
     test_y = []
+    #Build each fold
     for testFold in range(k):
         cur_test_X = []
         cur_test_y = []
+        #Add the indexes in the current fold to the test lists
         for exampleIndex in folds[testFold]:
             cur_test_X.append(X[exampleIndex])
             cur_test_y.append(y[exampleIndex])
@@ -95,7 +101,8 @@ def get_folds(X, y, k):
 
         cur_train_X = []
         cur_train_y = []
-        for foldIndex in filter(lambda x: x != testFold, range(0, k-1)):
+        #Add the examples not in the current fold to the train lists
+        for foldIndex in filter(lambda x: x != testFold, range(k)):
             for exampleIndex in folds[foldIndex]:
                 cur_train_X.append(X[exampleIndex])
                 cur_train_y.append(y[exampleIndex])
@@ -145,6 +152,10 @@ def main(**options):
         #Note that I changed fit to take in the schema
         classifier.fit(train_X, train_y, schema)
         train_time = (train_start - time.time())
+
+        #To see the values and confidences of the root node
+        #for attrVal, child in classifier.treeHead.children.iteritems():
+        #    print "%d with confidence %f" % (attrVal, child.classLabelConfidence)
 
         #Maintennce to keep track of the maxSize and maxDepth
         if classifier.size > maxSize:

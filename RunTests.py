@@ -4,7 +4,7 @@ from collections import OrderedDict
 #Use an ordered dictionary so we can perform the quicker tests first
 tests = OrderedDict()
 #Add (testName, command) key-value pairs
-tests['voting-dept-1']=['python', 
+tests['voting-dept-1-test-2']=['python', 
 			r'C:\\Users\\George\\Documents\\VMSharedFolder\\EECS440PA1\\code\\code\\python\\main.py',
 			'--dataset_directory',
 			'data',
@@ -13,7 +13,7 @@ tests['voting-dept-1']=['python',
 			'dtree',
 			'--depth',
 			'1']
-tests['voting-dept-inf']=['python', 
+tests['voting-dept-inf-test-2']=['python', 
 			r'C:\\Users\\George\\Documents\\VMSharedFolder\\EECS440PA1\\code\\code\\python\\main.py',
 			'--dataset_directory',
 			'data',
@@ -22,7 +22,7 @@ tests['voting-dept-inf']=['python',
 			'dtree',
 			'--depth',
 			'0']
-tests['spam-dept-1']=['python', 
+tests['spam-dept-1-test-2']=['python', 
 			r'C:\\Users\\George\\Documents\\VMSharedFolder\\EECS440PA1\\code\\code\\python\\main.py',
 			'--dataset_directory',
 			'data',
@@ -31,7 +31,7 @@ tests['spam-dept-1']=['python',
 			'dtree',
 			'--depth',
 			'1']
-tests['volcanoes-dept-1']=['python', 
+tests['volcanoes-dept-20-test-2']=['python', 
 			r'C:\\Users\\George\\Documents\\VMSharedFolder\\EECS440PA1\\code\\code\\python\\main.py',
 			'--dataset_directory',
 			'data',
@@ -39,8 +39,8 @@ tests['volcanoes-dept-1']=['python',
 			'volcanoes',
 			'dtree',
 			'--depth',
-			'1']
-tests['spam-dept-2']=['python', 
+			'20']
+tests['spam-dept-2-test-2']=['python', 
 			r'C:\\Users\\George\\Documents\\VMSharedFolder\\EECS440PA1\\code\\code\\python\\main.py',
 			'--dataset_directory',
 			'data',
@@ -49,7 +49,7 @@ tests['spam-dept-2']=['python',
 			'dtree',
 			'--depth',
 			'2']
-tests['volcanoes-dept-2']=['python', 
+tests['volcanoes-dept-16-test-2']=['python', 
 			r'C:\\Users\\George\\Documents\\VMSharedFolder\\EECS440PA1\\code\\code\\python\\main.py',
 			'--dataset_directory',
 			'data',
@@ -57,8 +57,8 @@ tests['volcanoes-dept-2']=['python',
 			'volcanoes',
 			'dtree',
 			'--depth',
-			'2']
-tests['spam-dept-3']=['python', 
+			'16']
+tests['spam-dept-3-test-2']=['python', 
 			r'C:\\Users\\George\\Documents\\VMSharedFolder\\EECS440PA1\\code\\code\\python\\main.py',
 			'--dataset_directory',
 			'data',
@@ -67,7 +67,7 @@ tests['spam-dept-3']=['python',
 			'dtree',
 			'--depth',
 			'3']
-tests['volcanoes-dept-3']=['python', 
+tests['volcanoes-dept-13-test-2']=['python', 
 			r'C:\\Users\\George\\Documents\\VMSharedFolder\\EECS440PA1\\code\\code\\python\\main.py',
 			'--dataset_directory',
 			'data',
@@ -75,8 +75,8 @@ tests['volcanoes-dept-3']=['python',
 			'volcanoes',
 			'dtree',
 			'--depth',
-			'3']
-tests['spam-dept-4']=['python', 
+			'13']
+tests['spam-dept-4-test-2']=['python', 
 			r'C:\\Users\\George\\Documents\\VMSharedFolder\\EECS440PA1\\code\\code\\python\\main.py',
 			'--dataset_directory',
 			'data',
@@ -85,7 +85,7 @@ tests['spam-dept-4']=['python',
 			'dtree',
 			'--depth',
 			'4']
-tests['volcanoes-dept-4']=['python', 
+tests['volcanoes-dept-10-test-2']=['python', 
 			r'C:\\Users\\George\\Documents\\VMSharedFolder\\EECS440PA1\\code\\code\\python\\main.py',
 			'--dataset_directory',
 			'data',
@@ -93,8 +93,8 @@ tests['volcanoes-dept-4']=['python',
 			'volcanoes',
 			'dtree',
 			'--depth',
-			'4']
-tests['spam-dept-5']=['python', 
+			'10']
+tests['spam-dept-5-test-2']=['python', 
 			r'C:\\Users\\George\\Documents\\VMSharedFolder\\EECS440PA1\\code\\code\\python\\main.py',
 			'--dataset_directory',
 			'data',
@@ -103,7 +103,7 @@ tests['spam-dept-5']=['python',
 			'dtree',
 			'--depth',
 			'5']
-tests['volcanoes-dept-5']=['python', 
+tests['volcanoes-dept-7-test-2']=['python', 
 			r'C:\\Users\\George\\Documents\\VMSharedFolder\\EECS440PA1\\code\\code\\python\\main.py',
 			'--dataset_directory',
 			'data',
@@ -111,15 +111,16 @@ tests['volcanoes-dept-5']=['python',
 			'volcanoes',
 			'dtree',
 			'--depth',
-			'5']
+			'7']
 
 #For each test
 for fileName, args in tests.iteritems():
-	#Run the tests and capture its printouts
-	result = subprocess.check_output(args)
-	#Save the printouts to a file
-	f = open(r'C:\\Users\\George\\Documents\\VMSharedFolder\\EECS440PA1\\code\\code\\python\\tests\\'+fileName+'.txt', 'w')
-	f.write(result)
-	f.close()
-	#Print out that this test has finished
-	print fileName+' test is done '
+	if  '' in fileName:
+		#Run the tests and capture its printouts
+		result = subprocess.check_output(args)
+		#Save the printouts to a file
+		f = open(r'C:\\Users\\George\\Documents\\VMSharedFolder\\EECS440PA1\\code\\code\\python\\tests\\'+fileName+'.txt', 'w')
+		f.write(result)
+		f.close()
+		#Print out that this test has finished
+		print fileName+' test is done '
